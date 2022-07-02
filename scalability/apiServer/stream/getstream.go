@@ -3,6 +3,7 @@ package stream
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -25,7 +26,9 @@ func NewGetStream(server, object string) (*GetSream, error) {
 	if server == "" || object == "" {
 		return nil, fmt.Errorf("invalid server %s object %s", server, object)
 	}
-	return newGetStream("http://" + server + "/objects/" + object)
+	url := "http://47.100.21.38" + server + "/objects/" + object
+	log.Println(url)
+	return newGetStream(url)
 }
 
 func (r *GetSream) Read(p []byte) (n int, err error) {

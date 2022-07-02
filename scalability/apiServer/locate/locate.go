@@ -2,6 +2,7 @@ package locate
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -18,6 +19,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	info := Locate(strings.Split(r.URL.EscapedPath(), "/")[2])
+	log.Println(info)
 	if len(info) == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -28,6 +30,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 func Locate(name string) string {
 	q := rabbitmq.New(os.Getenv("RABBITMQ_SERVER"))
+	q.Publish("dataServers", name)
 	msgs := q.Consume()
 
 	go func() {
@@ -36,6 +39,7 @@ func Locate(name string) string {
 	}()
 	msg := <-msgs
 	s, _ := strconv.Unquote(string(msg.Body))
+	log.Println("locate.Locate()", s)
 	return s
 }
 

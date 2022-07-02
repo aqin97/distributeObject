@@ -1,6 +1,7 @@
 package heartbeat
 
 import (
+	"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -62,6 +63,7 @@ func GetDataServer() []string {
 
 func ChooseRandomDataServer() string {
 	ds := GetDataServer()
+	log.Println(ds)
 	n := len(ds)
 	if n == 0 {
 		return ""
