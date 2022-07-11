@@ -11,5 +11,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		put(w, r)
 		return
 	}
+	if r.Method == http.MethodDelete {
+		del(w, r)
+		return
+	}
 	w.WriteHeader(http.StatusInternalServerError)
 }
