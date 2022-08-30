@@ -15,6 +15,7 @@ import (
 
 func put(w http.ResponseWriter, r *http.Request) {
 	/* put 2.0 版本
+	//r.URL.EscapedPath() 对url进行转义处理
 	object := strings.Split(r.URL.EscapedPath(), "/")[2]
 	c, err := storageObject(r.Body, object)
 	if err != nil {
@@ -30,6 +31,7 @@ func put(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	//url.PathEscape(hash) 对hash进行转义处理
 	c, err := storageObject(r.Body, url.PathEscape(hash))
 	if err != nil {
 		log.Println(err)

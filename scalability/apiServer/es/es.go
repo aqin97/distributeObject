@@ -24,13 +24,19 @@ type hit struct {
 
 type searchResult struct {
 	Hits struct {
-		Total int
-		Hits  []hit
+		Total struct {
+			Value    int
+			Relation string
+		}
+		Hits []hit
 	}
 }
 
 func getMetaData(name string, versionId int) (meta MetaData, err error) {
-	url := fmt.Sprintf("http://%s/metadata/object/%s_%d/_source", os.Getenv("ES_SERVER"), name, versionId)
+	//老版本es的url
+	//url := fmt.Sprintf("http://%s/metadata/objects/%s_%d/_source", os.Getenv("ES_SERVER"), name, versionId)
+	//新版本的url metadata指用户创建的索引（数据库）， _doc是7.X.X版本系统默认的，用户将name和versionId拼接成es中的id，可以通过这个id获取到对应的数据;_source去除系统元数据
+	url := fmt.Sprintf("http://%s/metadata/_doc/%s_%d/_source", os.Getenv("ES_SERVER"), name, versionId)
 	r, err := http.Get(url)
 	if err != nil {
 		log.Println(err)
@@ -46,6 +52,7 @@ func getMetaData(name string, versionId int) (meta MetaData, err error) {
 }
 
 func SearchLatestVersion(name string) (meta MetaData, err error) {
+	//es中text类型的数据没法sort，按需要可以改为keyword类型
 	url := fmt.Sprintf("http://%s/metadata/_search?q=name:%s&size=1&sort=version:desc", os.Getenv("ES_SERVER"), url.PathEscape(name))
 	r, err := http.Get(url)
 	if err != nil {
@@ -75,7 +82,7 @@ func GetMetaData(name string, version int) (MetaData, error) {
 func PutMetaData(name string, version int, size int64, hash string) error {
 	doc := fmt.Sprintf(`{"name":"%s","version":"%d","size":"%d","hash":"%s"}`, name, version, size, hash)
 	client := http.Client{}
-	url := fmt.Sprintf("http://%s/metadata/objects/%s_%d?op_type=create", os.Getenv("ES_SERVER"), name, version)
+	url := fmt.Sprintf("http://%s/metadata/_doc/%s_%d?op_type=create", os.Getenv("ES_SERVER"), name, version)
 	request, _ := http.NewRequest("PUT", url, strings.NewReader(doc))
 	r, err := client.Do(request)
 	if err != nil {
@@ -101,7 +108,7 @@ func AddVersion(name, hash string, size int64) error {
 }
 
 func SearchAllVersion(name string, from, size int) ([]MetaData, error) {
-	url := fmt.Sprintf("http://%s/metadata/_search?sort=name,version&from=%d&size=%d", os.Getenv("ES_SERVER"), from, size)
+	url := fmt.Sprintf("http://%s/metadata/_search?sort=version&from=%d&size=%d", os.Getenv("ES_SERVER"), from, size)
 	if name != "" {
 		url = url + "&q=name:" + name
 	}
