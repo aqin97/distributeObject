@@ -48,6 +48,7 @@ func ListenHeartbeat() {
 	}
 
 }
+
 func GetDataServer() []string {
 	mutex.Lock()
 	defer mutex.Unlock()
