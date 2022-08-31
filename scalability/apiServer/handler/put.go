@@ -26,7 +26,7 @@ func put(w http.ResponseWriter, r *http.Request) {
 
 	//put 3.0 版本
 	hash := utils.GetHashFromHeader(r.Header)
-	log.Println("从请求中获取到的hash", hash)
+	log.Println("handler.put hash", hash)
 	if hash == "" {
 		log.Println("missing object hash in digest header")
 		w.WriteHeader(http.StatusBadRequest)

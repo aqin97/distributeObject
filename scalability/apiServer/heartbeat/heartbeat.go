@@ -64,7 +64,7 @@ func GetDataServer() []string {
 
 func ChooseRandomDataServer() string {
 	ds := GetDataServer()
-	log.Println(ds)
+	log.Println("heartbeat.ChooseRandomDataServer: dataserver listening port list", ds)
 	n := len(ds)
 	if n == 0 {
 		return ""

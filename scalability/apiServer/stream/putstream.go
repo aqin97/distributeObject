@@ -18,11 +18,16 @@ func NewPutStream(server, object string) *PutStream {
 	go func() {
 
 		url := "http://47.100.21.38" + server + "/objects/" + object
-		log.Println(url)
-		request, _ := http.NewRequest("PUT", url, reader)
+		log.Println("stream.NewPutStream: url:", url)
+		request, err := http.NewRequest("PUT", url, reader)
+		if err != nil {
+			log.Println("stream.NewPutStream: err1:", err)
+		}
 		client := http.Client{}
 		r, e := client.Do(request)
-		log.Println(r.StatusCode)
+		if e != nil {
+			log.Println("stream.NewPutStream: err2:", e)
+		}
 		if e == nil && r.StatusCode != http.StatusOK {
 			e = fmt.Errorf("dataServer return http code %d", r.StatusCode)
 		}
@@ -36,5 +41,6 @@ func (ps *PutStream) Write(p []byte) (n int, err error) {
 }
 
 func (ps *PutStream) Close() error {
+	ps.writer.Close()
 	return <-ps.c
 }

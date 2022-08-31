@@ -12,10 +12,10 @@ import (
 )
 
 type MetaData struct {
-	Name    string
-	Version int
-	Size    int64
-	Hash    string
+	Name    string `json:"name"`
+	Version int    `json:"version"`
+	Size    int64  `json:"size"`
+	Hash    string `json:"hash"`
 }
 
 type hit struct {
@@ -80,10 +80,18 @@ func GetMetaData(name string, version int) (MetaData, error) {
 }
 
 func PutMetaData(name string, version int, size int64, hash string) error {
-	doc := fmt.Sprintf(`{"name":"%s","version":"%d","size":"%d","hash":"%s"}`, name, version, size, hash)
+	doc := fmt.Sprintf(`{"name":"%s","version":%d,"size":%d,"hash":"%s"}`, name, version, size, hash)
+	//
+	log.Println("es.PutMetaData doc: ", doc)
 	client := http.Client{}
 	url := fmt.Sprintf("http://%s/metadata/_doc/%s_%d?op_type=create", os.Getenv("ES_SERVER"), name, version)
-	request, _ := http.NewRequest("PUT", url, strings.NewReader(doc))
+	log.Println("es.PutMetaData url: ", url)
+	request, err := http.NewRequest("PUT", url, strings.NewReader(doc))
+	if err != nil {
+		log.Println("es.PutMetaData failed, err:", err)
+	}
+	//手动设置Content-Type=application/json，否则es会返回406 not acceptable 错误
+	request.Header["Content-Type"] = []string{"application/json"}
 	r, err := client.Do(request)
 	if err != nil {
 		return err
@@ -91,10 +99,12 @@ func PutMetaData(name string, version int, size int64, hash string) error {
 	if r.StatusCode == http.StatusConflict {
 		return PutMetaData(name, version+1, size, hash)
 	}
-	if r.StatusCode == http.StatusCreated {
-		res, _ := ioutil.ReadAll(r.Body)
-		return fmt.Errorf("fail to put metadata: %d %s", r.StatusCode, res)
-	}
+	/*
+		if r.StatusCode == http.StatusCreated {
+			res, _ := ioutil.ReadAll(r.Body)
+			return fmt.Errorf("fail to put metadata: %d %s", r.StatusCode, res)
+		}
+	*/
 
 	return nil
 }
@@ -118,6 +128,7 @@ func SearchAllVersion(name string, from, size int) ([]MetaData, error) {
 	}
 	metas := make([]MetaData, 0)
 	res, _ := ioutil.ReadAll(r.Body)
+	log.Println("es.SearchAllVersion res: ", res)
 	var sr searchResult
 	json.Unmarshal(res, &sr)
 	for i := range sr.Hits.Hits {
