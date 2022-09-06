@@ -12,6 +12,8 @@ import (
 
 func patch(w http.ResponseWriter, r *http.Request) {
 	uuid := strings.Split(r.URL.EscapedPath(), "/")[2]
+	log.Println(r.URL.EscapedPath())
+	log.Println("handler.patch uuid:", uuid)
 	tempinfo, err := readFromFile(uuid)
 	if err != nil {
 		log.Println(err)

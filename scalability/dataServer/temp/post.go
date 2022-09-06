@@ -5,9 +5,10 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 type tempInfo struct {
@@ -17,8 +18,12 @@ type tempInfo struct {
 }
 
 func post(w http.ResponseWriter, r *http.Request) {
-	output, _ := exec.Command("uuidgen").Output()
-	uuid := strings.TrimSuffix(string(output), "\n")
+	/*
+		output, err := exec.Command("uuidgen").Output()
+		uuid := strings.TrimSuffix(string(output), "\n")
+	*/
+	uuid := uuid.New().String()
+
 	name := strings.Split(r.URL.EscapedPath(), "/")[2]
 	size, err := strconv.ParseInt(r.Header.Get("size"), 0, 64)
 	if err != nil {

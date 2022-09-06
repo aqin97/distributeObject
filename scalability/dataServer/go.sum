@@ -1,4 +1,6 @@
 github.com/aqin97/rabbitmq v0.0.0-20220629120823-b2a60d8057e0 h1:jK1XNSVOxw2WD62LBizxJYOYDIGpfrv2WHDU1ADA6CA=
 github.com/aqin97/rabbitmq v0.0.0-20220629120823-b2a60d8057e0/go.mod h1:htdSprFfMWF+VNa5hlFoyU45Xc/c1esQylJgp2lIbUc=
+github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
+github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/streadway/amqp v1.0.0 h1:kuuDrUJFZL1QYL9hUNuCxNObNzB0bV/ZG5jV3RWAQgo=
 github.com/streadway/amqp v1.0.0/go.mod h1:AZpEONHx3DKn8O/DFsRAY58/XVQiIPMTMB1SddzLXVw=

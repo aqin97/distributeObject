@@ -51,9 +51,11 @@ func storageObject(r io.Reader, hash string, size int64) (int, error) {
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
-
+	//1
 	reader := io.TeeReader(r, stream)
+	//2
 	d := utils.CalculateHash(reader)
+	//3
 	if d != hash {
 		stream.Commit(false)
 		return http.StatusBadRequest, fmt.Errorf("object hash dismatch, calculate=%s, request=%s", d, hash)

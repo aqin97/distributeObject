@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -26,6 +27,9 @@ func GetSizeFromHeader(h http.Header) int64 {
 
 func CalculateHash(r io.Reader) string {
 	h := sha256.New()
-	io.Copy(h, r)
+	n, err := io.Copy(h, r)
+	if err != nil {
+		log.Println("calculateHash copy err:", err, n)
+	}
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
