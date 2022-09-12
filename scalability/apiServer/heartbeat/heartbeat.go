@@ -1,7 +1,6 @@
 package heartbeat
 
 import (
-	"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -62,6 +61,7 @@ func GetDataServer() []string {
 
 }
 
+/*
 func ChooseRandomDataServer() string {
 	ds := GetDataServer()
 	log.Println("heartbeat.ChooseRandomDataServer: dataserver listening port list", ds)
@@ -70,4 +70,29 @@ func ChooseRandomDataServer() string {
 		return ""
 	}
 	return ds[rand.Intn(n)]
+}
+*/
+func ChooseRandomDataServers(n int, exclude map[int]string) (ds []string) {
+	candidates := make([]string, 0)
+	reverseExcludeMap := make(map[string]int)
+	for id, addr := range exclude {
+		reverseExcludeMap[addr] = id
+	}
+	serrvers := GetDataServer()
+	for i := range serrvers {
+		s := serrvers[i]
+		_, excluded := reverseExcludeMap[s]
+		if !excluded {
+			candidates = append(candidates, s)
+		}
+	}
+	length := len(candidates)
+	if length < n {
+		return
+	}
+	p := rand.Perm(length)
+	for i := 0; i < n; i++ {
+		ds = append(ds, candidates[p[i]])
+	}
+	return
 }

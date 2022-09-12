@@ -4,7 +4,7 @@ import (
 	"distributeObject/scalability/apiServer/es"
 	"distributeObject/scalability/apiServer/heartbeat"
 	"distributeObject/scalability/apiServer/locate"
-	"distributeObject/scalability/apiServer/stream"
+	"distributeObject/scalability/apiServer/rs"
 	"distributeObject/scalability/apiServer/utils"
 	"fmt"
 	"io"
@@ -64,12 +64,12 @@ func storageObject(r io.Reader, hash string, size int64) (int, error) {
 	return http.StatusOK, nil
 }
 
-func putStream(hash string, size int64) (*stream.TempPutStream, error) {
-	server := heartbeat.ChooseRandomDataServer()
-	if server == "" {
-		return nil, fmt.Errorf("cannot find any dataserver")
+func putStream(hash string, size int64) (*rs.RSPutStream, error) {
+	servers := heartbeat.ChooseRandomDataServers(rs.ALL_SHARDS, nil)
+	if len(servers) == 0 {
+		return nil, fmt.Errorf("cannot find enough dataservers")
 	}
-	return stream.NewTempPutStream(server, hash, size)
+	return rs.NewRSPutStream(servers, hash, size)
 }
 
 //3.0banben
