@@ -11,12 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type tempInfo struct {
-	Uuid string
-	Name string
-	Size int64
-}
-
 func post(w http.ResponseWriter, r *http.Request) {
 	/*
 		output, err := exec.Command("uuidgen").Output()

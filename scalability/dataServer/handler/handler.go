@@ -1,13 +1,15 @@
 package handler
 
 import (
+	"crypto/sha256"
 	"distributeObject/scalability/dataServer/locate"
-	"distributeObject/scalability/dataServer/utils"
+	"encoding/base64"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -36,13 +38,34 @@ func get(w http.ResponseWriter, r *http.Request) {
 	sendFile(w, file)
 }
 
-func getFile(hash string) string {
-	file := os.Getenv("STORAGE_ROOT") + "/objects/" + hash
-	f, _ := os.Open(file)
-	d := url.PathEscape(utils.CalculateHash(f))
-	f.Close()
+func getFile(name string) string {
+	/*
+		file := os.Getenv("STORAGE_ROOT") + "/objects/" + hash
+		f, _ := os.Open(file)
+		d := url.PathEscape(utils.CalculateHash(f))
+		f.Close()
+		if d != hash {
+			log.Println("object hash mismatch, remove", file)
+			locate.Del(hash)
+			os.Remove(file)
+			return ""
+		}
+		return file
+	*/
+	files, err := filepath.Glob(os.Getenv("STORAGE_ROOT") + "/objects/" + name + ".*")
+	if err != nil {
+		log.Println("handler.getData err:", err)
+	}
+	if len(files) != 1 {
+		return ""
+	}
+	file := files[0]
+	h := sha256.New()
+	sendFile(h, file)
+	d := url.PathEscape(base64.StdEncoding.EncodeToString(h.Sum(nil)))
+	hash := strings.Split(file, ".")[2]
 	if d != hash {
-		log.Println("object hash mismatch, remove", file)
+		log.Println("handler.getData obejct hash dismatch, err:", err)
 		locate.Del(hash)
 		os.Remove(file)
 		return ""

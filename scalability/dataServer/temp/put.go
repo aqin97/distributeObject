@@ -1,7 +1,6 @@
 package temp
 
 import (
-	"distributeObject/scalability/dataServer/locate"
 	"log"
 	"net/http"
 	"os"
@@ -41,9 +40,4 @@ func put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	commitTempObejct(datFile, tempinfo)
-}
-
-func commitTempObejct(dataFile string, tempinfo *tempInfo) {
-	os.Rename(dataFile, os.Getenv("STORAGE_ROOT")+"/objects/"+tempinfo.Name)
-	locate.Add(tempinfo.Name)
 }

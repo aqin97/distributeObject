@@ -1,10 +1,12 @@
 package locate
 
 import (
+	"distributeObject/scalability/dataServer/types"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/aqin97/rabbitmq"
@@ -13,17 +15,21 @@ import (
 var objects = make(map[string]int)
 var mutex sync.Mutex
 
-func Locate(hash string) bool {
+func Locate(hash string) int {
 	mutex.Lock()
-	defer mutex.Unlock()
-	_, ok := objects[hash]
-	return ok
+
+	id, ok := objects[hash]
+	mutex.Unlock()
+	if !ok {
+		return -1
+	}
+	return id
 }
 
-func Add(hash string) {
+func Add(hash string, id int) {
 	mutex.Lock()
 	defer mutex.Unlock()
-	objects[hash] = 1
+	objects[hash] = id
 }
 
 func Del(hash string) {
@@ -42,8 +48,9 @@ func StartLocate() {
 		if err != nil {
 			panic(err)
 		}
-		if Locate(hash) {
-			q.Send(msg.ReplyTo, os.Getenv("LISTEN_ADDRESS"))
+		id := Locate(hash)
+		if id != -1 {
+			q.Send(msg.ReplyTo, types.LocateMessage{Addr: os.Getenv("LISTEN_ADDRESS"), Id: id})
 		}
 	}
 }
@@ -55,8 +62,16 @@ func CollectObject() {
 		log.Println("locate.CollectObject failed, err:", err)
 	}
 	for i := range files {
-		hash := filepath.Base(files[i])
-		objects[hash] = 1
+		file := strings.Split(filepath.Base(files[i]), ".")
+		if len(file) != 3 {
+			panic(files[i])
+		}
+		hash := file[0]
+		id, err := strconv.Atoi(file[1])
+		if err != nil {
+			panic(err)
+		}
+		objects[hash] = id
 	}
 }
 
